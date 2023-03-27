@@ -1,0 +1,80 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@tramisvlr 
+BurntSushi
+/
+ripgrep
+Public
+Fork your own copy of BurntSushi/ripgrep
+Code
+Issues
+141
+Pull requests
+66
+Discussions
+Actions
+Security
+Insights
+ripgrep/scripts/copy-examples /
+@BurntSushi
+BurntSushi scripts: add copy-examples
+…
+Latest commit eeaa42e on Sep 7, 2018
+ History
+ 1 contributor
+Executable File  33 lines (28 sloc)  1.09 KB
+
+#!/usr/bin/env python
+
+from __future__ import absolute_import, division, print_function
+import argparse
+import codecs
+import os.path
+import re
+
+RE_EACH_CODE_BLOCK = re.compile(
+    r'(?s)(?:```|\{\{< high rust[^>]+>\}\})[^\n]*\n(.*?)(?:```|\{\{< /high >\}\})'  # noqa
+)
+RE_MARKER = re.compile(r'^(?:# )?//([^/].*)$')
+RE_STRIP_COMMENT = re.compile(r'^# ?')
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser()
+    p.add_argument('--rust-file', default='src/cookbook.rs')
+    p.add_argument('--example-dir', default='grep/examples')
+    args = p.parse_args()
+
+    with codecs.open(args.rust_file, encoding='utf-8') as f:
+        rustcode = f.read()
+    for m in RE_EACH_CODE_BLOCK.finditer(rustcode):
+        lines = m.group(1).splitlines()
+        marker, codelines = lines[0], lines[1:]
+        m = RE_MARKER.search(marker)
+        if m is None:
+            continue
+
+        code = '\n'.join(RE_STRIP_COMMENT.sub('', line) for line in codelines)
+        fpath = os.path.join(args.example_dir, m.group(1))
+        with codecs.open(fpath, mode='w+', encoding='utf-8') as f:
+            print(code, file=f)
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+ripgrep/copy-examples at master · BurntSushi/ripgrep
